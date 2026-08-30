@@ -8,14 +8,14 @@ async function sha(s:string){const d=await crypto.subtle.digest('SHA-256',enc.en
 function token(){const a=new Uint8Array(32);crypto.getRandomValues(a);return [...a].map(b=>b.toString(16).padStart(2,'0')).join('')}
 function phoneKey(v:any){return String(v||'').replace(/\D/g,'')}
 function photo(v:any){const s=String(v||'');return s.startsWith('data:image/')&&s.length>100&&s.length<700000?s:null}
-function letters(v:string){return /^[\p{L}\s.'-]+$/u.test(v)}
+function letters(v:string){return /^[\p{L}\s]+$/u.test(v)}
 Deno.serve(async(req:Request)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return out({ok:false,error:'method'},405);try{const b=await req.json();const code=String(b.team_code||'').trim(),name=String(b.name||'').trim(),phone=String(b.phone||'').trim(),pin=String(b.pin||'').trim(),address=String(b.address||'').trim(),district=String(b.deployment_district||'').trim(),blood=String(b.blood_group||'').trim(),ecName=String(b.emergency_contact_name||'').trim(),ecPhone=String(b.emergency_contact_phone||'').trim(),p=photo(b.profile_photo_data_url),label=String(b.device_label||'').slice(0,120)||null;const pk=phoneKey(phone),epk=phoneKey(ecPhone)
 if(!code||!name||!phone||!pin||!address||!district||!blood||!ecName||!ecPhone||!p)return out({ok:false,error:'All registration fields, including profile photo, are required.'},400)
 if(name.length<2)return out({ok:false,error:'Enter your full name.'},400)
 if(pk.length<7||pk.length>15)return out({ok:false,error:'Enter a valid phone number.'},400)
 if(epk.length<7||epk.length>15)return out({ok:false,error:'Enter a valid emergency contact phone number.'},400)
 if(pin.length<4)return out({ok:false,error:'Rescuer code must be at least 4 digits.'},400)
-if(!letters(ecName))return out({ok:false,error:'Emergency contact name can contain letters only.'},400)
+if(!letters(ecName))return out({ok:false,error:'Emergency contact name can contain letters and spaces only.'},400)
 if(b.tracking_terms_accepted!==true||b.location_permission_confirmed!==true)return out({ok:false,error:'Location tracking consent and location permission are required.'},400)
 const ch=await sha(code);const {data:team,error:te}=await admin.from('rescue_teams').select('id,name,checkin_minutes,active').eq('join_code_hash',ch).eq('active',true).maybeSingle();if(te)throw te;if(!team)return out({ok:false,error:'Invalid team code.'},403)
 const {data:all,error:ae}=await admin.from('rescue_devices').select('id,team_id,rescuer_name,phone,rescuer_pin_hash,active,approval_status,mission_status').not('phone','is',null).limit(5000);if(ae)throw ae;const existing=(all||[]).find((d:any)=>phoneKey(d.phone)===pk)
