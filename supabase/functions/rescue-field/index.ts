@@ -1,5 +1,5 @@
 const RAW='https://raw.githubusercontent.com/danphe1/DMT_rescue/792313d1c3ff816f650d894b8acc20c97e569f02/supabase/functions/rescue-field/index.ts'
-const REG='https://fkxbohbrfotbwmqalzyw.supabase.co/functions/v1/rescue-registration-api-preview'
+const REG='https://fkxbohbrfotbwmqalzyw.supabase.co/functions/v1/rescue-registration-api'
 let cache:Promise<string>|null=null
 async function page(){if(cache)return cache;cache=(async()=>{const r=await fetch(RAW,{headers:{'cache-control':'no-cache'}});if(!r.ok)throw new Error('base field fetch '+r.status);const s=await r.text();const a='const H=String.raw`',z='`\nDeno.serve';const i=s.indexOf(a),j=s.lastIndexOf(z);if(i<0||j<0)throw new Error('base field payload missing');let h=s.slice(i+a.length,j)
 h=h.replace('<label>Profile Photo</label>','<label>Profile Photo <span style="color:#c62828">*</span></label>')
