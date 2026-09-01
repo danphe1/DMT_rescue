@@ -1,0 +1,1 @@
+Photo and submit fix implementation lives in index.ts
